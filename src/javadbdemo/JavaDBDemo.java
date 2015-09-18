@@ -9,36 +9,44 @@ import java.sql.*;
 
 /**
  *
- * @author 
+ * @author
  */
 public class JavaDBDemo {
 
+    public static boolean initConnection(){
+        try{
+             //Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
+             Class.forName("org.apache.derby.jdbc.ClientDriver");
+             return true;
+        }catch(ClassNotFoundException e){
+            System.out.println(e);
+            return false;
+        }
+    }
+    
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         // TODO code application logic here
-         try{
-             //Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
-             Class.forName("org.apache.derby.jdbc.ClientDriver");
-        }catch(ClassNotFoundException e){
-            System.out.println(e);
-        }
-        
-        try{
-            Connection con = DriverManager.getConnection("jdbc:derby://localhost:1527/TestDerby", "test", "test");
-            Statement stmt = con.createStatement();
-
-            ResultSet rs = stmt.executeQuery("SELECT * FROM COLLEAGUES");
-
-            while (rs.next()) {
-            String first = rs.getString("firstName");
-            String last = rs.getString("lastName");
-            String email = rs.getString("email");
-            System.out.println(first + " " + last + " " + email);
-        }
-        }catch(SQLException e){
-            System.err.println(e);
+        if(initConnection()){
+            try{
+                JavaDBCreate createDB = new JavaDBCreate();
+                Connection con = DriverManager.getConnection("jdbc:derby://localhost:1527/TestDerby", "test", "test");
+                Statement stmt = con.createStatement();
+                
+                createDB.dropTable(stmt);
+                createDB.createTable(stmt);
+                createDB.insertData(stmt, "INSERT INTO PERSON VALUES (1001, 'Juan Carlos Garcia')");
+                createDB.insertData(stmt, "INSERT INTO PERSON VALUES (1002, 'Jerson Gomez')");
+                createDB.insertData(stmt, "INSERT INTO PERSON VALUES (1003, 'Juana Lopez')");
+                createDB.showAllData(stmt);
+                createDB.updateData(stmt, "UPDATE PERSON SET NAME='Jhon Montez' WHERE CI=1002");
+                createDB.showAllData(stmt);
+                
+            }catch(SQLException e){
+                System.err.println("ERROR: " + e);
+            }
         }
     }
     
